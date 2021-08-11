@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:loginapp/album.dart';
 import 'package:loginapp/register_page.dart';
 import 'package:loginapp/widgets/CustomTextField.dart';
 import 'package:loginapp/widgets/Custombutton.dart';
@@ -39,12 +40,16 @@ class _LoginState extends State<Login> {
                       children: [
                         SizedBox(height: 30),
                         CustomTextField(
+                          validator: (value) =>
+                              value!.isEmpty ? "enter username" : null,
                           preIcon: Icons.email,
-                          hint: 'Email',
+                          hint: 'username',
                           controllerText: usernameController,
                         ),
                         SizedBox(height: 15),
                         CustomTextField(
+                          validator: (value) =>
+                              value!.isEmpty ? "enter password" : null,
                           preIcon: Icons.lock,
                           hint: 'password',
                           controllerText: passController,
@@ -75,6 +80,21 @@ class _LoginState extends State<Login> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => Albm()),
+                      );
+                    },
+                    child: Text(
+                      "home",
+                      style: TextStyle(
+                        color: Colors.blue,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   )
                 ],
               ),
@@ -87,19 +107,20 @@ class _LoginState extends State<Login> {
 
   Future<void> login() async {
     if (passController.text.isNotEmpty && usernameController.text.isNotEmpty) {
-      http.Response response =
-          await http.post(Uri.parse("http://192.168.43.241:8000/api/login/"),
-              body: ({
-                'username': usernameController.text,
-                'password': passController.text,
-              }));
+      http.Response response = await http.post(
+          Uri.parse("http://127.0.0.1:8000/authentication/token/"),
+          body: ({
+            'username': usernameController.text,
+            'password': passController.text,
+          }));
       if (response.statusCode == 200) {
-        print("gooooo");
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('${response.statusCode}')));
         // Navigator.push(
         //     context, MaterialPageRoute(builder: (context) => HomePage()));
       } else {
         ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Invalid Credentials.')));
+            .showSnackBar(SnackBar(content: Text('${response.statusCode}')));
       }
     } else {
       ScaffoldMessenger.of(context)

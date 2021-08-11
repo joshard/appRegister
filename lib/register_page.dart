@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:loginapp/login_page.dart';
 import 'package:loginapp/widgets/CustomTextField.dart';
 import 'package:loginapp/widgets/Custombutton.dart';
@@ -44,6 +45,9 @@ class _RegisterState extends State<Register> {
                       ),
                       SizedBox(height: 15),
                       CustomTextField(
+                        validator: (val) => val!.isEmpty || !val.contains("@")
+                            ? "enter a valid eamil"
+                            : null,
                         preIcon: Icons.email,
                         hint: 'Email',
                         controllerText: emailController,
@@ -100,9 +104,25 @@ class _RegisterState extends State<Register> {
         usernameController.text.isNotEmpty &&
         repassController.text.isNotEmpty &&
         emailController.text.isNotEmpty) {
+      http.Response response = await http.post(
+          Uri.parse("http://127.0.0.1:8000/authentication/register/"),
+          body: ({
+            'username': usernameController.text,
+            'email': emailController.text,
+            'password': passController.text,
+          }));
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text("${response.statusCode}")));
+        Navigator.push(
+            context, MaterialPageRoute(builder: (context) => Login()));
+      } else {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text("${response.statusCode}")));
+      }
     } else {
       ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text("fill the Blank fields")));
+          .showSnackBar(SnackBar(content: Text("Blank fields fill in")));
     }
   }
 }
